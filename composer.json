@@ -1,0 +1,41 @@
+{
+  "name": "oblak/wp-hook-di",
+  "description": "Simplifies the use of WordPress hooks by allowing you to use simple dependency injection.",
+  "authors": [
+    {
+      "name": "Sibin Grasic",
+      "email": "sibin.grasic@oblak.studio"
+    }
+  ],
+  "license": "GPL-2.0-only",
+  "version": "2.0.3",
+  "type": "library",
+  "require": {
+    "php": ">= 8.0",
+    "automattic/jetpack-constants": "^2.0",
+    "oblak/wp-polyfills": "^1.0"
+  },
+  "require-dev": {
+    "oblak/wordpress-coding-standard": "^1"
+  },
+  "suggest": {
+    "automattic/jetpack-autoloader": "Allow for better interoperability with other plugins that use this package."
+  },
+  "autoload": {
+    "psr-4": {
+      "Oblak\\WP\\": "src"
+    },
+    "files": [
+      "src/Utils/oblak-wp-metadata-utils.php"
+    ]
+  },
+  "config": {
+    "classmap-authoritative": true,
+    "optimize-autoloader": true,
+    "sort-packages": true,
+    "allow-plugins": {
+      "automattic/jetpack-autoloader": true,
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  }
+}
