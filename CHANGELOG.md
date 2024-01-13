@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/oblakstudio/wp-hook-di/compare/v1.0.0...v1.0.1) (2024-01-13)
+
+
+### Bug Fixes
+
+* Fixed DI metadata to work with multiple priorities ([edc1da8](https://github.com/oblakstudio/wp-hook-di/commit/edc1da8bd5c33e3f06789529a71ec17005219c43))
+
 # 1.0.0 (2024-01-03)
 
 
