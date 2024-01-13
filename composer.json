@@ -19,7 +19,8 @@
     "oblak/wordpress-coding-standard": "^1"
   },
   "suggest": {
-    "automattic/jetpack-autoloader": "Allow for better interoperability with other plugins that use this package."
+    "automattic/jetpack-autoloader": "Allow for better interoperability with other plugins that use this package.",
+    "oblak/composer-wp-di-finder-plugin": "Automatically find Hookable classes"
   },
   "autoload": {
     "psr-4": {

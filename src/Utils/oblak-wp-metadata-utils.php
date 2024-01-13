@@ -81,24 +81,22 @@ function parse_annotations( ReflectionMethod &$method, ?array $needed_keys = nul
 /**
  * Determine the priority of a hook.
  *
- * @param  array $hook_args Hook arguments.
- * @return array            Hook arguments with the priority set.
+ * @param  int|string|null $priority_prop Priority property.
+ * @return int
  */
-function set_hook_priority( array $hook_args ): array {
-    $priority_prop = $hook_args['priority'] ?? 10;
+function get_hook_priority( int|string|null $priority_prop = null ): int {
+    $priority_prop ??= 10;
     if ( is_numeric( $priority_prop ) ) {
-        $priority_prop = intval( $priority_prop );
+        return intval( $priority_prop );
     } elseif ( Constants::get_constant( $priority_prop ) ) {
-        $priority_prop = Constants::get_constant( $priority_prop );
+        return Constants::get_constant( $priority_prop );
     } elseif ( str_starts_with( $priority_prop, 'filter:' ) ) {
         $filter_data = explode( ':', $priority_prop );
 
-        $priority_prop = apply_filters( $filter_data[1], $filter_data[2] ?? 10 ); //phpcs:ignore WooCommerce.Commenting.HookComment
+        return apply_filters( $filter_data[1], $filter_data[2] ?? 10 ); //phpcs:ignore WooCommerce.Commenting.HookComment
+    } else {
+        return 10;
     }
-
-    $hook_args['priority'] = $priority_prop;
-
-    return $hook_args;
 }
 
 /**
@@ -115,7 +113,7 @@ function get_class_hooks( $class_or_obj, ?array $needed_keys = null, bool $all =
     return array_filter(
         array_map(
             fn( $hook_args ) => wp_parse_args(
-                set_hook_priority( $hook_args ),
+                $hook_args,
                 array(
 					'hook' => null,
 					'args' => 0,
@@ -145,14 +143,14 @@ function invoke_class_hooks( $class_or_obj, ?array $hooks = null ) {
     $hooks ??= get_class_hooks( $class_or_obj );
 
     foreach ( $hooks as $function => $hook_data ) {
-        $hook_data['priority'] ??= 10;
-        $hook_names              = array_map( 'trim', explode( ',', $hook_data['hook'] ) );
+        $hook_names      = array_map( 'trim', explode( ',', $hook_data['hook'] ) );
+        $hook_priorities = array_map( fn( $p ) => get_hook_priority( $p ), explode( ',', $hook_data['priority'] ?? '' ) );
 
-        foreach ( $hook_names as $hook_name ) {
+        foreach ( $hook_names as $index => $hook_name ) {
             "add_{$hook_data['type']}"(
                 $hook_name,
                 array( $class_or_obj, $function ),
-                $hook_data['priority'],
+                $hook_priorities[ $index ] ?? 10,
                 $hook_data['args']
             );
         }
