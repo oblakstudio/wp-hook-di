@@ -129,7 +129,7 @@ function get_class_hooks( $class_or_obj, ?array $needed_keys = null, bool $all =
                 )
             )
         ),
-        fn ( $h ) => ! empty( $h['hook'] )
+        fn ( $h ) => is_null( $needed_keys ) || ( count( array_intersect( $needed_keys, array_keys( $h ) ) ) >= count( $needed_keys ) )
     );
 }
 

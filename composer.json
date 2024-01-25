@@ -8,7 +8,6 @@
     }
   ],
   "license": "GPL-2.0-only",
-  "version": "1.0.1",
   "type": "library",
   "require": {
     "php": ">= 8.0",
@@ -16,6 +15,7 @@
     "oblak/wp-polyfills": "^1.0"
   },
   "require-dev": {
+    "ergebnis/composer-normalize": "^2.31",
     "oblak/wordpress-coding-standard": "^1"
   },
   "suggest": {
@@ -36,7 +36,8 @@
     "sort-packages": true,
     "allow-plugins": {
       "automattic/jetpack-autoloader": true,
-      "dealerdirect/phpcodesniffer-composer-installer": true
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "ergebnis/composer-normalize": true
     }
   }
 }
