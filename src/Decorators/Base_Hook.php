@@ -54,13 +54,15 @@ abstract class Base_Hook {
      * @return int
      */
     private function parse_priority( array|int|string $prio ): int {
-        return match ( true ) {
-            is_numeric( $prio )      => (int) $prio,
-            is_array( $prio )        => call_user_func( $prio ),
-            is_callable( $prio )     => $prio(),
-            is_string( $prio )       => apply_filters( $prio, 10, $this->tag ),
+        $prio = match ( true ) {
+            \is_numeric( $prio )      => (int) $prio,
+            \is_array( $prio )        => \call_user_func( $prio ),
+            \is_callable( $prio )     => $prio(),
+            \is_string( $prio )       => \apply_filters( $prio, 10, $this->tag ),
             default                  => 10,
-        };
+        } ?? 10;
+
+        return (int) $prio;
     }
 
     /**
@@ -95,8 +97,8 @@ abstract class Base_Hook {
 
         static::$registry[ $class ][ $method ] ??= array();
         static::$registry[ $class ][ $method ][] = array(
-            'tag'      => $this->tag,
             'priority' => $this->priority,
+            'tag'      => $this->tag,
         );
     }
 }
