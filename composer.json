@@ -15,7 +15,6 @@
     "oblak/wp-polyfills": "^1.0"
   },
   "require-dev": {
-    "ergebnis/composer-normalize": "^2.31",
     "oblak/wordpress-coding-standard": "^1"
   },
   "suggest": {
@@ -27,7 +26,8 @@
       "Oblak\\WP\\": "src"
     },
     "files": [
-      "src/Utils/oblak-wp-metadata-utils.php"
+      "src/Utils/oblak-wp-metadata-utils.php",
+      "src/Utils/oblak-wp-hook-utils.php"
     ]
   },
   "config": {

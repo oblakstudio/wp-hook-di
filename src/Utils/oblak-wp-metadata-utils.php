@@ -1,4 +1,4 @@
-<?php
+<?php //phpcs:disable Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 /**
  * WordPress metadata utils
  *
@@ -155,4 +155,27 @@ function invoke_class_hooks( $class_or_obj, ?array $hooks = null ) {
             );
         }
     }
+}
+
+/**
+ * Get all the traits used by a class.
+ *
+ * @param  string|object $object_or_class Class or object to get the traits for.
+ * @param  bool          $autoload        Whether to allow this function to load the class automatically through the __autoload() magic method.
+ * @return array                          Array of traits.
+ */
+function class_uses_deep( string|object $object_or_class, bool $autoload = true ) {
+    $traits = array();
+
+    do {
+        $traits = array_merge( class_uses( $object_or_class, $autoload ), $traits );
+    } while ( $object_or_class = get_parent_class( $object_or_class ) );
+
+    foreach ( $traits as $trait => $same ) {
+
+        $traits = array_merge( class_uses( $trait, $autoload ), $traits );
+
+    }
+
+    return array_unique( $traits );
 }
