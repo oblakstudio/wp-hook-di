@@ -54,11 +54,12 @@ function xwp_get_hooked_methods( object|string $obj, bool $all = false ): array 
 /**
  * Get hook decorators for a method.
  *
+ * @template T
  * @param  ReflectionFunctionAbstract|ReflectionClass $thing Method to get the decorators for.
- * @param  string                                     $att   Decorator attribute to get.
- * @return array
+ * @param  class-string<T>                            $att   Decorator attribute to get.
+ * @return array<int, T>|false
  */
-function xwp_get_hook_decorators(
+function xwp_get_hook_decorators( //phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
     ReflectionFunctionAbstract|ReflectionClass $thing,
     string $att = Base_Hook::class,
 ): array|false {

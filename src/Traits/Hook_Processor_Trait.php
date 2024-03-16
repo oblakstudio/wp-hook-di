@@ -18,7 +18,6 @@ use function Oblak\WP\Utils\invoke_class_hooks;
  * Enables basic DI and hooking functionality for plugins / themes
  */
 trait Hook_Processor_Trait {
-
     /**
      * Plugin textdomain
      *
@@ -31,10 +30,13 @@ trait Hook_Processor_Trait {
      *
      * @param string $hook     Hook name.
      * @param int    $priority Hook priority.
+     * @param bool   $legacy   Whether to use the legacy hooking method.
      */
-    public function init( string $hook = 'plugins_loaded', int $priority = 10 ) {
-        add_action( $hook, array( $this, 'run_hooks' ), $priority );
-        add_action( $hook, array( $this, 'init_dependencies' ), $priority );
+    public function init( string $hook = 'plugins_loaded', int $priority = 10, bool $legacy = true ) {
+        $callback = ! $legacy ? 'invoke_hooked_methods' : 'run_hooks';
+
+        \add_action( $hook, array( $this, $callback ), $priority );
+        \add_action( $hook, array( $this, 'init_dependencies' ), $priority );
     }
 
     /**
@@ -45,7 +47,14 @@ trait Hook_Processor_Trait {
     abstract protected function get_dependencies(): array;
 
     /**
-     * Runs the registered hooks for the plugin.
+     * Invokes all the hooked methods for a class or object.
+     */
+    public function invoke_hooked_methods() {
+        \xwp_invoke_hooked_methods( $this );
+    }
+
+    /**
+     * Legacy method of invoking the hook
      */
     public function run_hooks() {
         invoke_class_hooks( $this );
@@ -64,15 +73,36 @@ trait Hook_Processor_Trait {
                 continue;
             }
 
-            $di_data[ $dep_data['hook'] ][ $dep_data['priority'] ][] = wp_array_slice_assoc( $dep_data, array( 'classname', 'conditional' ) );
+            $di_data[ $dep_data['hook'] ][ $dep_data['priority'] ][] = \wp_array_slice_assoc(
+                $dep_data,
+                array( 'classname', 'conditional' ),
+            );
         }
 
         foreach ( $di_data as $hook => $priorities ) {
-            ksort( $priorities );
+            \ksort( $priorities );
 
             foreach ( $priorities as $priority => $deps ) {
-                add_action( $hook, fn() => $this->load_dependencies( $deps ), $priority );
+                \add_action( $hook, fn() => $this->load_dependencies( $deps ), $priority );
             }
+        }
+    }
+
+    protected function organize_dependencies(): array {
+        $dep_tree = array();
+        foreach ( $this->get_dependencies() as $classname ) {
+            $dec = \current(
+                \xwp_get_hook_decorators(
+                    new \ReflectionClass( $classname ),
+                    Hookable::class,
+                ),
+            );
+
+            $dep_tree[ $dec->hook ][ $dec->priority ][ $classname ] = array(
+                'args'  => $dec->args,
+                'check' => $dec->conditional,
+                'init'  => $dec->init,
+            );
         }
     }
 
@@ -84,16 +114,15 @@ trait Hook_Processor_Trait {
      */
     protected function get_dependency_data( string $dep_class ): ?array {
         $metadata = get_decorators( $dep_class, Hookable::class );
-        $metadata = array_shift( $metadata );
+        $metadata = \array_shift( $metadata );
 
         return $metadata ? array(
-            'hook'        => $metadata->hook,
-            'priority'    => $metadata->priority,
-            'classname'   => $dep_class,
-            'conditional' => $metadata->conditional,
+
+            'hook'     => $metadata->hook,
+            'init'     => $metadata->init,
+            'priority' => $metadata->priority,
         ) : null;
     }
-
 
     /**
      * Loads the dependencies
@@ -101,14 +130,14 @@ trait Hook_Processor_Trait {
      * @param array<string, callable|class-string> $deps Array of dependencies.
      */
     protected function load_dependencies( array $deps ) {
-        $deps = wp_list_pluck(
-            array_filter(
+        $deps = \wp_list_pluck(
+            \array_filter(
                 $deps,
-                fn( $dep ) => $dep['conditional'](),
+                static fn( $dep ) => $dep['conditional'](),
             ),
-            'classname'
+            'classname',
         );
 
-        array_walk( $deps, fn( $d ) => new $d() );
+        \array_walk( $deps, static fn( $d ) => new $d() );
     }
 }
