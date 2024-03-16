@@ -87,7 +87,7 @@ function xwp_get_hookable_method_types( object|string $obj ): int {
 		$method_types |= ReflectionMethod::IS_STATIC;
 	}
 
-	if ( in_array( '\Oblak\WP\Traits\Accessible_Hook_Methods', xwp_class_uses_deep( $obj ), true ) ) {
+	if ( in_array( 'Oblak\WP\Traits\Accessible_Hook_Methods', xwp_class_uses_deep( $obj ), true ) ) {
 		$method_types |= ReflectionMethod::IS_PRIVATE | ReflectionMethod::IS_PROTECTED;
 	}
 
