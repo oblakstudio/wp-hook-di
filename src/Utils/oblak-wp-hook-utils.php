@@ -7,8 +7,6 @@
 
 use Oblak\WP\Decorators\Base_Hook;
 
-use function Oblak\WP\Utils\class_uses_deep;
-
 /**
  * Invokes all the hooked methods for a class or object.
  *

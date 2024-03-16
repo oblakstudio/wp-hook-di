@@ -27,10 +27,12 @@ trait Accessible_Hook_Methods {
         $should_throw = static::check_access( $this, $name );
 
         if ( false !== $should_throw ) {
-            throw new \BadMethodCallException( esc_html( $should_throw ) );
+            throw new \BadMethodCallException( \esc_html( $should_throw ) );
         }
 
-        return is_callable( array( 'parent', '__call' ) ) ? parent::__call( $name, $arguments ) : ( $this->$name )( ...$arguments );
+        return \is_callable( array( 'parent', '__call' ) )
+            ? parent::__call( $name, $arguments )
+            : $this->$name( ...$arguments );
     }
 
     /**
@@ -46,7 +48,7 @@ trait Accessible_Hook_Methods {
         $should_throw = static::check_access( static::class, $name );
 
         if ( false !== $should_throw ) {
-            throw new \BadMethodCallException( esc_html( $should_throw ) );
+            throw new \BadMethodCallException( \esc_html( $should_throw ) );
         }
 
         return static::$name( ...$arguments );
@@ -60,11 +62,17 @@ trait Accessible_Hook_Methods {
      * @return string|false
      */
     private static function check_access( string|object $class_or_obj, string $method ): string|false {
-        $classname = is_object( $class_or_obj ) ? $class_or_obj::class : $class_or_obj;
+        $classname = \is_object( $class_or_obj ) ? $class_or_obj::class : $class_or_obj;
 
         return match ( true ) {
-            ! method_exists( $class_or_obj, $method ) => 'Call to undefined method ' . $classname . '::' . $method,
-            ! static::is_valid_method( $classname, $method ) => 'Call to private method ' . $classname . '::' . $method,
+            ! \method_exists(
+                $class_or_obj,
+                $method,
+            ) => 'Call to undefined method ' . $classname . '::' . $method,
+            ! static::is_valid_method(
+                $classname,
+                $method,
+            ) => 'Call to private method ' . $classname . '::' . $method,
             default => false,
         };
     }
@@ -77,10 +85,10 @@ trait Accessible_Hook_Methods {
      * @return bool
      */
     private static function is_valid_method( string $classname, string $method ): bool {
-        return array_reduce(
+        return \array_reduce(
             static::get_registered_hooks( $classname, $method ),
-            fn( bool $c, string $hook ) => $c || doing_action( $hook ) || doing_filter( $hook ),
-            false
+            static fn( bool $c, string $hook ) => $c || \doing_action( $hook ) || \doing_filter( $hook ),
+            false,
         );
     }
 
@@ -92,6 +100,6 @@ trait Accessible_Hook_Methods {
      * @return array
      */
     private static function get_registered_hooks( string $classname, string $method ): array {
-        return array_unique( wp_list_pluck( Filter::$registry[ $classname ][ $method ] ?? array(), 'tag' ) );
+        return \array_unique( \wp_list_pluck( Filter::$registry[ $classname ][ $method ] ?? array(), 'tag' ) );
     }
 }

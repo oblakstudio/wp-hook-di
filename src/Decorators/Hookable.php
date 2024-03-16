@@ -16,11 +16,19 @@ use Attribute;
 #[Attribute( Attribute::TARGET_CLASS )]
 class Hookable {
     /**
+     * Arguments for the hookable class constructor
+     *
+     * @var array
+     */
+    public array $args;
+
+    /**
      * Constructor
      *
      * @param  string   $hook        Hook name.
      * @param  int      $priority    Hook priority.
      * @param  callable $conditional Conditional callback function.
+     * @param  mixed    ...$args     Arguments to pass to the hookable class constructor.
      */
     public function __construct(
         /**
@@ -41,6 +49,8 @@ class Hookable {
          * @var callable
          */
         public $conditional = '__return_true',
+        mixed ...$args,
     ) {
+        $this->args = $args;
     }
 }
