@@ -1,4 +1,4 @@
-<?php
+<?php //phpcs:disable Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition, SlevomatCodingStandard.ControlStructures.AssignmentInCondition.AssignmentInCondition
 /**
  * Utility functions for the WP hooks.
  *
@@ -20,10 +20,7 @@ function xwp_invoke_hooked_methods( object|string $obj, bool $all = false ) {
 
     foreach ( $methods as $method => $hook_data ) {
         foreach ( $hook_data['hooks'] as $hook ) {
-            $hook->run_hook(
-                array( $obj, $method ),
-                $hook_data['args']
-            );
+            $hook->run_hook( array( $obj, $method ), $hook_data['args'] );
 		}
 	}
 }
@@ -39,20 +36,20 @@ function xwp_get_hooked_methods( object|string $obj, bool $all = false ): array 
     $reflector = new ReflectionClass( $obj );
     $methods   = array_filter(
         $reflector->getMethods( xwp_get_hookable_method_types( $obj ) ),
-        fn( $m ) => $all || $m->class === $reflector->getName()
+        static fn( $m ) => $all || $m->class === $reflector->getName()
     );
 
     return array_filter(
         wp_array_flatmap(
             $methods,
-            fn( $m )=> array(
+            static fn( $m ) => array(
 				$m->getName() => array(
-					'hooks' => xwp_get_hook_decorators( $m ),
-					'args'  => $m->getNumberOfParameters(),
+                    'args'  => $m->getNumberOfParameters(),
+                    'hooks' => xwp_get_hook_decorators( $m ),
 				),
             ),
         ),
-        fn( $m ) => $m['hooks']
+        static fn( $m ) => $m['hooks']
     );
 }
 
@@ -65,13 +62,13 @@ function xwp_get_hooked_methods( object|string $obj, bool $all = false ): array 
  */
 function xwp_get_hook_decorators(
     ReflectionFunctionAbstract|ReflectionClass $thing,
-    string $att = Base_Hook::class
+    string $att = Base_Hook::class,
 ): array|false {
     $decorators = array_filter(
         array_map(
-            fn( $d ) => $d?->newInstance() ?? false,
-            $thing->getAttributes( $att, ReflectionAttribute::IS_INSTANCEOF )
-        )
+            static fn( $d ) => $d?->newInstance() ?? false,
+            $thing->getAttributes( $att, ReflectionAttribute::IS_INSTANCEOF ),
+        ),
     );
 
     return $decorators ? $decorators : false;
@@ -90,9 +87,30 @@ function xwp_get_hookable_method_types( object|string $obj ): int {
 		$method_types |= ReflectionMethod::IS_STATIC;
 	}
 
-	if ( in_array( '\Oblak\WP\Traits\Accessible_Hook_Methods', class_uses_deep( $obj ), true ) ) {
+	if ( in_array( '\Oblak\WP\Traits\Accessible_Hook_Methods', xwp_class_uses_deep( $obj ), true ) ) {
 		$method_types |= ReflectionMethod::IS_PRIVATE | ReflectionMethod::IS_PROTECTED;
 	}
 
 	return $method_types;
+}
+
+/**
+ * Get all the traits used by a class.
+ *
+ * @param  string|object $object_or_class Class or object to get the traits for.
+ * @param  bool          $autoload        Whether to allow this function to load the class automatically through the __autoload() magic method.
+ * @return array                          Array of traits.
+ */
+function xwp_class_uses_deep( string|object $object_or_class, bool $autoload = true ) {
+    $traits = array();
+
+    do {
+        $traits = \array_merge( \class_uses( $object_or_class, $autoload ), $traits );
+    } while ( $object_or_class = \get_parent_class( $object_or_class ) );
+
+    foreach ( $traits as $trait ) {
+        $traits = \array_merge( \class_uses( $trait, $autoload ), $traits );
+    }
+
+    return \array_values( \array_unique( $traits ) );
 }

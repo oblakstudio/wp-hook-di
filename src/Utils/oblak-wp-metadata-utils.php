@@ -1,4 +1,4 @@
-<?php //phpcs:disable Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+<?php //phpcs:disable SlevomatCodingStandard.Namespaces.FullyQualifiedGlobalFunctions
 /**
  * WordPress metadata utils
  *
@@ -26,14 +26,17 @@ function get_decorators( $class_or_obj, $decorator, bool $all = false ) {
     $decorators = array();
 
     while ( $class_or_obj ) {
-        $decorators   = array_merge(
+        $decorators   = \array_merge(
             $decorators,
-            array_map(
-                fn( $d ) => $d?->newInstance(),
-                ( new ReflectionClass( $class_or_obj ) )?->getAttributes( $decorator, ReflectionAttribute::IS_INSTANCEOF )
-            )
+            \array_map(
+                static fn( $d ) => $d?->newInstance(),
+                ( new ReflectionClass( $class_or_obj ) )?->getAttributes(
+                    $decorator,
+                    ReflectionAttribute::IS_INSTANCEOF,
+                ),
+            ),
         );
-        $class_or_obj = $all ? get_parent_class( $class_or_obj ) : null;
+        $class_or_obj = $all ? \get_parent_class( $class_or_obj ) : null;
     }
 
     return $decorators;
@@ -52,28 +55,28 @@ function parse_annotations( ReflectionMethod &$method, ?array $needed_keys = nul
         return null;
     }
 
-    preg_match_all( '/@([a-z]+?)\s+(.*?)\n/i', $doc, $annotations );
+    \preg_match_all( '/@([a-z]+?)\s+(.*?)\n/i', $doc, $annotations );
 
-    if ( ! isset( $annotations[1] ) || 0 === count( $annotations[1] ) ) {
+    if ( ! isset( $annotations[1] ) || 0 === \count( $annotations[1] ) ) {
         return array();
     }
 
     $needed_keys ??= array( 'hook', 'type' );
 
-    $annotations = array_filter(
-        array_merge( // Merge the parsed annotations with number of params from the method.
-            array_combine(  // Combine the annotations with their values.
-                array_map( 'trim', $annotations[1] ), // Trim the keys.
-                array_map( 'trim', $annotations[2] ) // Trim the values.
+    $annotations = \array_filter(
+        \array_merge( // Merge the parsed annotations with number of params from the method.
+            \array_combine(  // Combine the annotations with their values.
+                \array_map( 'trim', $annotations[1] ), // Trim the keys.
+                \array_map( 'trim', $annotations[2] ), // Trim the values.
             ),
-            array( 'args' => $method->getNumberOfParameters() ) // Add the number of params.
+            array( 'args' => $method->getNumberOfParameters() ), // Add the number of params.
         ),
-        fn( $v ) => '' !== $v
+        static fn( $v ) => '' !== $v,
     );
 
     // If the number of found annotations doesn't match the number of needed keys -> gtfo.
-    return count( $annotations ) >= count( $needed_keys ) &&
-        count( array_intersect( $needed_keys, array_keys( $annotations ) ) ) >= count( $needed_keys )
+    return \count( $annotations ) >= \count( $needed_keys ) &&
+        \count( \array_intersect( $needed_keys, \array_keys( $annotations ) ) ) >= \count( $needed_keys )
         ? $annotations
         : array();
 }
@@ -86,17 +89,24 @@ function parse_annotations( ReflectionMethod &$method, ?array $needed_keys = nul
  */
 function get_hook_priority( int|string|null $priority_prop = null ): int {
     $priority_prop ??= 10;
-    if ( is_numeric( $priority_prop ) ) {
-        return intval( $priority_prop );
-    } elseif ( Constants::get_constant( $priority_prop ) ) {
-        return Constants::get_constant( $priority_prop );
-    } elseif ( str_starts_with( $priority_prop, 'filter:' ) ) {
-        $filter_data = explode( ':', $priority_prop );
-
-        return apply_filters( $filter_data[1], $filter_data[2] ?? 10 ); //phpcs:ignore WooCommerce.Commenting.HookComment
-    } else {
-        return 10;
+    if ( \is_numeric( $priority_prop ) ) {
+        return \intval( $priority_prop );
     }
+
+    if ( Constants::get_constant( $priority_prop ) ) {
+        return Constants::get_constant( $priority_prop );
+    }
+
+    if ( \str_starts_with( $priority_prop, 'filter:' ) ) {
+        $filter_data = \explode( ':', $priority_prop );
+
+        return \apply_filters(
+            $filter_data[1],
+            $filter_data[2] ?? 10,
+        ); //phpcs:ignore WooCommerce.Commenting.HookComment
+    }
+
+    return 10;
 }
 
 /**
@@ -110,26 +120,35 @@ function get_hook_priority( int|string|null $priority_prop = null ): int {
 function get_class_hooks( $class_or_obj, ?array $needed_keys = null, bool $all = false ): array {
     $reflector = new ReflectionClass( $class_or_obj );
 
-    return array_filter(
-        array_map(
-            fn( $hook_args ) => wp_parse_args(
+    return \array_filter(
+        \array_map(
+            static fn( $hook_args ) => \wp_parse_args(
                 $hook_args,
                 array(
-					'hook' => null,
-					'args' => 0,
-                )
+                    'args' => 0,
+                    'hook' => null,
+                ),
             ),
-            array_filter(
-                wp_array_flatmap(
-                    array_filter(
+            \array_filter(
+                \wp_array_flatmap(
+                    \array_filter(
                         $reflector->getMethods( ReflectionMethod::IS_PUBLIC ) ?? array(),
-                        fn( $method ) => $all || $method->class === $reflector->getName()
+                        static fn( $method ) => $all || $method->class === $reflector->getName()
                     ),
-                    fn( $method ) => array( $method->getName() => parse_annotations( $method, $needed_keys ) ),
-                )
-            )
+                    static fn( $method ) => array(
+						$method->getName() => parse_annotations(
+                            $method,
+                            $needed_keys,
+                        ),
+                    ),
+                ),
+            ),
         ),
-        fn ( $h ) => is_null( $needed_keys ) || ( count( array_intersect( $needed_keys, array_keys( $h ) ) ) >= count( $needed_keys ) )
+        static fn( $h ) => \is_null( $needed_keys ) || ( \count(
+            \array_intersect( $needed_keys, \array_keys( $h ) ),
+        ) >= \count(
+            $needed_keys,
+        ) )
     );
 }
 
@@ -143,8 +162,11 @@ function invoke_class_hooks( $class_or_obj, ?array $hooks = null ) {
     $hooks ??= get_class_hooks( $class_or_obj );
 
     foreach ( $hooks as $function => $hook_data ) {
-        $hook_names      = array_map( 'trim', explode( ',', $hook_data['hook'] ) );
-        $hook_priorities = array_map( fn( $p ) => get_hook_priority( $p ), explode( ',', $hook_data['priority'] ?? '' ) );
+        $hook_names      = \array_map( 'trim', \explode( ',', $hook_data['hook'] ) );
+        $hook_priorities = \array_map(
+            static fn( $p ) => get_hook_priority( $p ),
+            \explode( ',', $hook_data['priority'] ?? '' ),
+        );
 
         foreach ( $hook_names as $index => $hook_name ) {
             "add_{$hook_data['type']}"(
@@ -155,27 +177,4 @@ function invoke_class_hooks( $class_or_obj, ?array $hooks = null ) {
             );
         }
     }
-}
-
-/**
- * Get all the traits used by a class.
- *
- * @param  string|object $object_or_class Class or object to get the traits for.
- * @param  bool          $autoload        Whether to allow this function to load the class automatically through the __autoload() magic method.
- * @return array                          Array of traits.
- */
-function class_uses_deep( string|object $object_or_class, bool $autoload = true ) {
-    $traits = array();
-
-    do {
-        $traits = array_merge( class_uses( $object_or_class, $autoload ), $traits );
-    } while ( $object_or_class = get_parent_class( $object_or_class ) );
-
-    foreach ( $traits as $trait => $same ) {
-
-        $traits = array_merge( class_uses( $trait, $autoload ), $traits );
-
-    }
-
-    return array_unique( $traits );
 }
