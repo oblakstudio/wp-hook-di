@@ -28,7 +28,8 @@
       "Oblak\\WP\\": "src"
     },
     "files": [
-      "src/Utils/wp-hook-di-fn-loader.php"
+      "src/Utils/oblak-wp-metadata-utils.php",
+      "src/Utils/oblak-wp-hook-utils.php"
     ]
   },
   "config": {
