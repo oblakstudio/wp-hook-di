@@ -9,19 +9,15 @@
 namespace Oblak\WP\Decorators;
 
 use Attribute;
+use XWP\Hook\Decorators\Handler;
 
 /**
  * Defines class as hookable - it will be automatically constructed on given hook with given priority.
+ *
+ * @deprecated 1.0.0 Use `XWP\Hook\Decorators\Handler` instead.
  */
 #[Attribute( Attribute::TARGET_CLASS )]
-class Hookable {
-    /**
-     * Arguments for the hookable class constructor
-     *
-     * @var array
-     */
-    public array $args;
-
+class Hookable extends Handler {
     /**
      * Constructor
      *
@@ -31,26 +27,11 @@ class Hookable {
      * @param  mixed    ...$args     Arguments to pass to the hookable class constructor.
      */
     public function __construct(
-        /**
-         * Hook name
-         *
-         * @var string
-         */
-        public string $hook,
-        /**
-         * Hook priority
-         *
-         * @var int
-         */
-        public int $priority = 10,
-        /**
-         * Conditional callback function
-         *
-         * @var callable
-         */
-        public $conditional = '__return_true',
+        string $hook,
+        int $priority = 10,
+        $conditional = '__return_true',
         mixed ...$args,
     ) {
-        $this->args = $args;
+        parent::__construct( tag: $hook, priority: $priority, conditional: $conditional );
     }
 }

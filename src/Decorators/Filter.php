@@ -8,16 +8,13 @@
 
 namespace Oblak\WP\Decorators;
 
+use XWP\Hook\Decorators\Filter as New_Filter;
+
 /**
  * Filter decorator.
+ *
+ * @deprecated 1.0.0 Use `XWP\Hook\Decorators\Filter` instead.
  */
 #[\Attribute( \Attribute::TARGET_FUNCTION | \Attribute::IS_REPEATABLE | \Attribute::TARGET_METHOD )]
-class Filter extends Base_Hook {
-
-    /**
-     * {@inheritDoc}
-     */
-    protected function get_action(): callable {
-        return 'add_filter';
-    }
+class Filter extends New_Filter {
 }

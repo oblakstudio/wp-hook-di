@@ -8,10 +8,7 @@
 
 namespace Oblak\WP\Utils;
 
-use Automattic\Jetpack\Constants;
-use ReflectionAttribute;
-use ReflectionClass;
-use ReflectionMethod;
+use Oblak\WP\Annotation_Parser;
 
 /**
  * Get decorators for a class or object.
@@ -21,92 +18,52 @@ use ReflectionMethod;
  * @param  class-string<T> $decorator    Decorator class to get.
  * @param  bool            $all          Whether to get all the decorators or only the ones in the class.
  * @return T[]                           Array of decorators.
+ *
+ * @deprecated 2.0.0 Use Invoker API.
  */
 function get_decorators( $class_or_obj, $decorator, bool $all = false ) {
-    $decorators = array();
-
-    while ( $class_or_obj ) {
-        $decorators   = \array_merge(
-            $decorators,
-            \array_map(
-                static fn( $d ) => $d?->newInstance(),
-                ( new ReflectionClass( $class_or_obj ) )?->getAttributes(
-                    $decorator,
-                    ReflectionAttribute::IS_INSTANCEOF,
-                ),
-            ),
-        );
-        $class_or_obj = $all ? \get_parent_class( $class_or_obj ) : null;
-    }
-
-    return $decorators;
+    return $all
+        ? \XWP\Hook\Reflection::get_decorators_deep( $class_or_obj, $decorator )
+        : \XWP\Hook\Reflection::get_decorators( $class_or_obj, $decorator );
 }
 
 /**
  * Parses PHPDoc annotations.
  *
- * @param  ReflectionMethod $method Method to parse annotations for.
- * @param  array<string>    $needed_keys Keys that must be present in the parsed annotations.
- * @return array<string,string>     Parsed annotations.
+ * @param  \ReflectionMethod $method      Method to parse annotations for.
+ * @param  array<string>     $needed_keys Keys that must be present in the parsed annotations.
+ * @return array<string,string>           Parsed annotations.
+ *
+ * @deprecated 2.0.0 Use Invoker API.
  */
-function parse_annotations( ReflectionMethod &$method, ?array $needed_keys = null ): ?array {
-    $doc = $method->getDocComment();
-    if ( ! $doc ) {
+function parse_annotations( \ReflectionMethod &$method, ?array $needed_keys = null ): ?array {
+    $annotations = Annotation_Parser::parse_annotations( $method->getDocComment(), $needed_keys );
+
+    if ( ! $annotations ) {
         return null;
     }
 
-    \preg_match_all( '/@([a-z]+?)\s+(.*?)\n/i', $doc, $annotations );
+    $annotations['priority'] = get_hook_priority( $annotations['priority'] ?? null );
 
-    if ( ! isset( $annotations[1] ) || 0 === \count( $annotations[1] ) ) {
-        return array();
-    }
-
-    $needed_keys ??= array( 'hook', 'type' );
-
-    $annotations = \array_filter(
-        \array_merge( // Merge the parsed annotations with number of params from the method.
-            \array_combine(  // Combine the annotations with their values.
-                \array_map( 'trim', $annotations[1] ), // Trim the keys.
-                \array_map( 'trim', $annotations[2] ), // Trim the values.
-            ),
-            array( 'args' => $method->getNumberOfParameters() ), // Add the number of params.
-        ),
-        static fn( $v ) => '' !== $v,
-    );
-
-    // If the number of found annotations doesn't match the number of needed keys -> gtfo.
-    return \count( $annotations ) >= \count( $needed_keys ) &&
-        \count( \array_intersect( $needed_keys, \array_keys( $annotations ) ) ) >= \count( $needed_keys )
-        ? $annotations
-        : array();
+    return $annotations;
 }
 
 /**
  * Determine the priority of a hook.
  *
- * @param  int|string|null $priority_prop Priority property.
+ * @param  int|string|callable|null $priority_prop Priority property.
  * @return int
+ *
+ * @deprecated 2.0.0 Use Invoker API.
  */
-function get_hook_priority( int|string|null $priority_prop = null ): int {
-    $priority_prop ??= 10;
-    if ( \is_numeric( $priority_prop ) ) {
-        return \intval( $priority_prop );
-    }
+function get_hook_priority( int|string|callable|null $priority_prop = null ): int {
+    $p = Annotation_Parser::parse_priority( $priority_prop );
 
-    if ( Constants::get_constant( $priority_prop ) ) {
-        return Constants::get_constant( $priority_prop );
-    }
-
-    if ( \str_starts_with( $priority_prop, 'filter:' ) ) {
-        $filter_data = \explode( ':', $priority_prop );
-
-        return \apply_filters(
-            $filter_data[1],
-            $filter_data[2] ?? 10,
-        ); //phpcs:ignore WooCommerce.Commenting.HookComment
-    }
-
-    return 10;
+    return match ( true ) {
+        is_callable( $p ) => $p(),
+        is_string( $p )   => apply_filters( $p, 10 ),
+        default         => $p,
+    };
 }
 
 /**
@@ -116,40 +73,11 @@ function get_hook_priority( int|string|null $priority_prop = null ): int {
  * @param  array|null          $needed_keys  Keys that must be present in the parsed annotations.
  * @param  bool                $all          Whether to get all the hooks or only the ones in the class.
  * @return array                             Array of hooks.
+ *
+ * @deprecated 2.0.0 Use Invoker API.
  */
 function get_class_hooks( $class_or_obj, ?array $needed_keys = null, bool $all = false ): array {
-    $reflector = new ReflectionClass( $class_or_obj );
-
-    return \array_filter(
-        \array_map(
-            static fn( $hook_args ) => \wp_parse_args(
-                $hook_args,
-                array(
-                    'args' => 0,
-                    'hook' => null,
-                ),
-            ),
-            \array_filter(
-                \wp_array_flatmap(
-                    \array_filter(
-                        $reflector->getMethods( ReflectionMethod::IS_PUBLIC ) ?? array(),
-                        static fn( $method ) => $all || $method->class === $reflector->getName()
-                    ),
-                    static fn( $method ) => array(
-						$method->getName() => parse_annotations(
-                            $method,
-                            $needed_keys,
-                        ),
-                    ),
-                ),
-            ),
-        ),
-        static fn( $h ) => \is_null( $needed_keys ) || ( \count(
-            \array_intersect( $needed_keys, \array_keys( $h ) ),
-        ) >= \count(
-            $needed_keys,
-        ) )
-    );
+    return Annotation_Parser::get_class_hooks( $class_or_obj, $needed_keys, $all );
 }
 
 /**
@@ -157,24 +85,9 @@ function get_class_hooks( $class_or_obj, ?array $needed_keys = null, bool $all =
  *
  * @param  string|object $class_or_obj Class or object to invoke the hooks for.
  * @param  array|null    $hooks        Hooks to invoke.
+ *
+ * @deprecated 2.0.0 Use Invoker API.
  */
 function invoke_class_hooks( $class_or_obj, ?array $hooks = null ) {
-    $hooks ??= get_class_hooks( $class_or_obj );
-
-    foreach ( $hooks as $function => $hook_data ) {
-        $hook_names      = \array_map( 'trim', \explode( ',', $hook_data['hook'] ) );
-        $hook_priorities = \array_map(
-            static fn( $p ) => get_hook_priority( $p ),
-            \explode( ',', $hook_data['priority'] ?? '' ),
-        );
-
-        foreach ( $hook_names as $index => $hook_name ) {
-            "add_{$hook_data['type']}"(
-                $hook_name,
-                array( $class_or_obj, $function ),
-                $hook_priorities[ $index ] ?? 10,
-                $hook_data['args']
-            );
-        }
-    }
+    Annotation_Parser::invoke_class_hooks( $class_or_obj, $hooks );
 }

@@ -8,8 +8,6 @@
 
 namespace Oblak\WP\Abstracts;
 
-use function Oblak\WP\Utils\invoke_class_hooks;
-
 /**
  * Base hook runner.
  *
@@ -20,6 +18,6 @@ abstract class Hook_Runner {
      * Constructor
      */
     public function __construct() {
-        invoke_class_hooks( $this );
+        \Oblak\WP\Annotation_Parser::invoke_class_hooks( $this );
     }
 }

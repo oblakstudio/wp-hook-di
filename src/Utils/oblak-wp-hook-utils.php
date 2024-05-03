@@ -5,71 +5,73 @@
  * @package WP Utils
  */
 
-use Oblak\WP\Decorators\Base_Hook;
+use XWP\Contracts\Hook\Invokable;
+use XWP\Hook\Reflection;
 
 /**
  * Invokes all the hooked methods for a class or object.
  *
  * @param  object|string $obj The object or class name to invoke the hooked methods for.
  * @param  bool          $all Whether to invoke all the methods or only the ones in the specified class.
+ *
+ * @deprecated 2.0.0 Use Invoker API.
  */
-function xwp_invoke_hooked_methods( object|string $obj, bool $all = false ) {
-    $methods = xwp_get_hooked_methods( $obj, $all );
+function xwp_invoke_hooked_methods( object|string $obj, ?bool $all = null ) {
+    if ( ! is_null( $all ) ) {
+        _doing_it_wrong( __FUNCTION__, 'The $all parameter is deprecated.', '2.0.0' );
+    }
 
-    foreach ( $methods as $method => $hook_data ) {
-        foreach ( $hook_data['hooks'] as $hook ) {
-            $hook->run_hook( array( $obj, $method ), $hook_data['args'] );
-		}
-	}
+    if ( ! is_object( $obj ) ) {
+        $obj = new $obj();
+    }
+    \XWP\Hook\Invoker::instance()->load_handler( $obj );
 }
 
 /**
  * Get all the hooked methods for a class or object.
  *
  * @param  object|string $obj The object or class name to get the hooked methods for.
- * @param  bool          $all Whether to get all the methods or only the ones in the class.
- * @return array<string, array{hooks: array<int, Base_Hook>, args: int}>
+ * @param  ?bool         $all Whether to get all the methods or only the ones in the class.
+ * @return array<string, array{hooks: array<int, Invokable>, args: int}>
+ *
+ * @deprecated 2.0.0 Use Invoker API.
  */
-function xwp_get_hooked_methods( object|string $obj, bool $all = false ): array {
-    $reflector = new ReflectionClass( $obj );
-    $methods   = array_filter(
-        $reflector->getMethods( xwp_get_hookable_method_types( $obj ) ),
-        static fn( $m ) => $all || $m->class === $reflector->getName()
-    );
+function xwp_get_hooked_methods( object|string $obj, ?bool $all = null ): array {
+    if ( ! is_null( $all ) ) {
+        _doing_it_wrong( __FUNCTION__, 'The $all parameter is deprecated.', '2.0.0' );
+    }
 
-    return array_filter(
-        wp_array_flatmap(
-            $methods,
-            static fn( $m ) => array(
-				$m->getName() => array(
-                    'args'  => $m->getNumberOfParameters(),
-                    'hooks' => xwp_get_hook_decorators( $m ),
-				),
-            ),
-        ),
-        static fn( $m ) => $m['hooks']
-    );
+    $methods = array();
+
+    foreach ( Reflection::get_hookable_methods( Reflection::get_reflector( $obj ) ) as $m ) {
+        $methods[ $m->getName() ] = array(
+            'args'  => $m->getNumberOfParameters(),
+            'hooks' => Reflection::get_decorators( $m, Invokable::class ),
+        );
+    }
+
+    return $methods;
 }
 
 /**
  * Get hook decorators for a method.
  *
- * @param  ReflectionFunctionAbstract|ReflectionClass $thing Method to get the decorators for.
- * @param  string                                     $att   Decorator attribute to get.
+ * @param  Reflector $thing Method to get the decorators for.
+ * @param  string    $att   Deprecated.
  * @return array
+ *
+ * @deprecated 2.0.0 Use Invoker API.
  */
-function xwp_get_hook_decorators(
-    ReflectionFunctionAbstract|ReflectionClass $thing,
-    string $att = Base_Hook::class,
-): array|false {
-    $decorators = array_filter(
-        array_map(
-            static fn( $d ) => $d?->newInstance() ?? false,
-            $thing->getAttributes( $att, ReflectionAttribute::IS_INSTANCEOF ),
-        ),
-    );
+function xwp_get_hook_decorators( Reflector $thing, string $att = '' ): array|false {
+    if ( '' !== $att ) {
+        _doing_it_wrong( __FUNCTION__, 'The $att parameter is deprecated.', '2.0.0' );
+    }
 
-    return $decorators ? $decorators : false;
+    if ( ! ( $thing instanceof ReflectionClass ) ) {
+        return false;
+    }
+
+    return Reflection::get_decorators( $thing, Invokable::class ) ?? false;
 }
 
 /**
@@ -79,17 +81,7 @@ function xwp_get_hook_decorators(
  * @return int                Bitmask of method types.
  */
 function xwp_get_hookable_method_types( object|string $obj ): int {
-	$method_types = ReflectionMethod::IS_PUBLIC;
-
-	if ( is_string( $obj ) ) {
-		$method_types |= ReflectionMethod::IS_STATIC;
-	}
-
-	if ( in_array( 'Oblak\WP\Traits\Accessible_Hook_Methods', xwp_class_uses_deep( $obj ), true ) ) {
-		$method_types |= ReflectionMethod::IS_PRIVATE | ReflectionMethod::IS_PROTECTED;
-	}
-
-	return $method_types;
+    return Reflection::get_method_types( xwp_class_uses_deep( $obj ) );
 }
 
 /**
@@ -98,17 +90,9 @@ function xwp_get_hookable_method_types( object|string $obj ): int {
  * @param  string|object $object_or_class Class or object to get the traits for.
  * @param  bool          $autoload        Whether to allow this function to load the class automatically through the __autoload() magic method.
  * @return array                          Array of traits.
+ *
+ * @deprecated 2.0.0 Use Invoker API.
  */
 function xwp_class_uses_deep( string|object $object_or_class, bool $autoload = true ) {
-    $traits = array();
-
-    do {
-        $traits = \array_merge( \class_uses( $object_or_class, $autoload ), $traits );
-    } while ( $object_or_class = \get_parent_class( $object_or_class ) );
-
-    foreach ( $traits as $trait ) {
-        $traits = \array_merge( \class_uses( $trait, $autoload ), $traits );
-    }
-
-    return \array_values( \array_unique( $traits ) );
+    return Reflection::class_uses_deep( $object_or_class, $autoload );
 }
