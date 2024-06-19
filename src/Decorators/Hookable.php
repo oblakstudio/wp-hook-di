@@ -24,14 +24,23 @@ class Hookable extends Handler {
      * @param  string   $hook        Hook name.
      * @param  int      $priority    Hook priority.
      * @param  callable $conditional Conditional callback function.
+     * @param  string   $tag         Tag name. Optional, if not provided, hook name will be used.
      * @param  mixed    ...$args     Arguments to pass to the hookable class constructor.
+     *
+     * @throws \InvalidArgumentException If hook or tag is not provided.
      */
     public function __construct(
-        string $hook,
+        ?string $hook = null,
         int $priority = 10,
-        $conditional = '__return_true',
+        $conditional = null,
+        ?string $tag = null,
         mixed ...$args,
     ) {
-        parent::__construct( tag: $hook, priority: $priority, conditional: $conditional );
+        $tgt = $tag ?? $hook ?? false;
+
+        if ( ! $tgt ) {
+            throw new \InvalidArgumentException( 'Hook name or tag must be provided.' );
+        }
+        parent::__construct( tag: $tgt, priority: $priority, conditional: $conditional );
     }
 }

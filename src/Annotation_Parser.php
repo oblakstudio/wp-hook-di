@@ -16,8 +16,6 @@ use XWP\Hook\Decorators\Hook;
 
 /**
  * Annotation parser for legacy code.
- *
- * @deprecated 1.0.0
  */
 final class Annotation_Parser {
     /**

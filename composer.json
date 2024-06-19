@@ -10,16 +10,15 @@
     }
   ],
   "require": {
-    "php": "^8.1",
-    "automattic/jetpack-constants": "^2.0",
+    "php": ">=8.1",
+    "automattic/jetpack-constants": "^2",
     "x-wp/hook-invoker": "^1"
   },
   "require-dev": {
-    "oblak/wordpress-coding-standard": "^1.1.1"
+    "oblak/wordpress-coding-standard": "^1"
   },
   "suggest": {
-    "automattic/jetpack-autoloader": "Allow for better interoperability with other plugins that use this package.",
-    "oblak/composer-wp-di-finder-plugin": "Automatically find Hookable classes"
+    "automattic/jetpack-autoloader": "Allow for better interoperability with other plugins that use this package."
   },
   "minimum-stability": "beta",
   "prefer-stable": true,
@@ -34,8 +33,7 @@
   },
   "config": {
     "allow-plugins": {
-      "dealerdirect/phpcodesniffer-composer-installer": true,
-      "ergebnis/composer-normalize": true
+      "dealerdirect/phpcodesniffer-composer-installer": true
     }
   }
 }
