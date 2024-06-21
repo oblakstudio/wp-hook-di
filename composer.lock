@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "38f510eefc47b59051e3c36b7947707f",
+    "content-hash": "225ddf21ac6562183000f0693ba29d03",
     "packages": [
         {
             "name": "automattic/jetpack-constants",
@@ -56,6 +56,111 @@
                 "source": "https://github.com/Automattic/jetpack-constants/tree/v2.0.3"
             },
             "time": "2024-05-29T09:44:58+00:00"
+        },
+        {
+            "name": "x-wp/helper-classes",
+            "version": "v1.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/x-wp/helper-classes.git",
+                "reference": "ef3c62875d20b89eaaf78a3b0f3d79d962dd2030"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/x-wp/helper-classes/zipball/ef3c62875d20b89eaaf78a3b0f3d79d962dd2030",
+                "reference": "ef3c62875d20b89eaaf78a3b0f3d79d962dd2030",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0",
+                "x-wp/helper-traits": "^1"
+            },
+            "suggest": {
+                "automattic/jetpack-autoloader": "Allow for better interoperability with other plugins that use this package."
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "XWP\\Helper\\Classes\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-only"
+            ],
+            "authors": [
+                {
+                    "name": "Sibin Grasic",
+                    "email": "sibin.grasic@oblak.studio"
+                }
+            ],
+            "description": "Generic abstraction related to xWP packages",
+            "keywords": [
+                "abstractions",
+                "contracts",
+                "decoupling",
+                "extended-wp",
+                "interfaces",
+                "interoperability",
+                "standards"
+            ],
+            "support": {
+                "issues": "https://github.com/x-wp/helper-classes/issues",
+                "source": "https://github.com/x-wp/helper-classes/tree/v1.3.0"
+            },
+            "time": "2024-05-31T04:26:38+00:00"
+        },
+        {
+            "name": "x-wp/helper-traits",
+            "version": "v1.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/x-wp/helper-traits.git",
+                "reference": "b99bcb6f2fadeedba30fc63abe39aa8e88e0949f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/x-wp/helper-traits/zipball/b99bcb6f2fadeedba30fc63abe39aa8e88e0949f",
+                "reference": "b99bcb6f2fadeedba30fc63abe39aa8e88e0949f",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0"
+            },
+            "suggest": {
+                "automattic/jetpack-autoloader": "Allow for better interoperability with other plugins that use this package."
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "XWP\\Helper\\Traits\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-only"
+            ],
+            "authors": [
+                {
+                    "name": "Sibin Grasic",
+                    "email": "sibin.grasic@oblak.studio"
+                }
+            ],
+            "description": "Various traits related to xWP packages",
+            "keywords": [
+                "contracts",
+                "decoupling",
+                "extended-wp",
+                "interfaces",
+                "interoperability",
+                "standards",
+                "traits"
+            ],
+            "support": {
+                "issues": "https://github.com/x-wp/helper-traits/issues",
+                "source": "https://github.com/x-wp/helper-traits/tree/v1.3.0"
+            },
+            "time": "2024-05-26T16:39:47+00:00"
         },
         {
             "name": "x-wp/hook-contracts",
@@ -112,21 +217,22 @@
         },
         {
             "name": "x-wp/hook-invoker",
-            "version": "v1.0.0-beta.6",
+            "version": "v1.0.0-beta.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/x-wp/hook-invoker.git",
-                "reference": "e133fbfa076992c34cf4c150cbb4f46791ca4b7d"
+                "reference": "6cb42c3ff2af3badddcd3c4e21b4aa55b198ad85"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/x-wp/hook-invoker/zipball/e133fbfa076992c34cf4c150cbb4f46791ca4b7d",
-                "reference": "e133fbfa076992c34cf4c150cbb4f46791ca4b7d",
+                "url": "https://api.github.com/repos/x-wp/hook-invoker/zipball/6cb42c3ff2af3badddcd3c4e21b4aa55b198ad85",
+                "reference": "6cb42c3ff2af3badddcd3c4e21b4aa55b198ad85",
                 "shasum": ""
             },
             "require": {
                 "automattic/jetpack-constants": "^2.0",
                 "php": ">=8.1",
+                "x-wp/helper-classes": "^1.3",
                 "x-wp/hook-contracts": "^1"
             },
             "provide": {
@@ -165,9 +271,9 @@
             ],
             "support": {
                 "issues": "https://github.com/x-wp/hook-manager/issues",
-                "source": "https://github.com/x-wp/hook-invoker/tree/v1.0.0-beta.6"
+                "source": "https://github.com/x-wp/hook-invoker/tree/v1.0.0-beta.7"
             },
-            "time": "2024-05-08T18:46:58+00:00"
+            "time": "2024-06-19T21:37:20+00:00"
         }
     ],
     "packages-dev": [
@@ -889,11 +995,13 @@
     ],
     "aliases": [],
     "minimum-stability": "beta",
-    "stability-flags": [],
+    "stability-flags": {
+        "x-wp/hook-invoker": 10
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": "^8.1"
+        "php": ">=8.1"
     },
     "platform-dev": [],
     "plugin-api-version": "2.6.0"
