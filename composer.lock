@@ -4,29 +4,29 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "38f510eefc47b59051e3c36b7947707f",
+    "content-hash": "225ddf21ac6562183000f0693ba29d03",
     "packages": [
         {
             "name": "automattic/jetpack-constants",
-            "version": "v2.0.3",
+            "version": "v2.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-constants.git",
-                "reference": "f5da87d3b7f80411b77aa58a7355733ea72295aa"
+                "reference": "f6958c313a34c5e92171c45a57d9dc978e5975ed"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-constants/zipball/f5da87d3b7f80411b77aa58a7355733ea72295aa",
-                "reference": "f5da87d3b7f80411b77aa58a7355733ea72295aa",
+                "url": "https://api.github.com/repos/Automattic/jetpack-constants/zipball/f6958c313a34c5e92171c45a57d9dc978e5975ed",
+                "reference": "f6958c313a34c5e92171c45a57d9dc978e5975ed",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.0"
             },
             "require-dev": {
-                "automattic/jetpack-changelogger": "^4.2.4",
+                "automattic/jetpack-changelogger": "^4.2.6",
                 "brain/monkey": "2.6.1",
-                "yoast/phpunit-polyfills": "1.1.0"
+                "yoast/phpunit-polyfills": "^1.1.1"
             },
             "suggest": {
                 "automattic/jetpack-autoloader": "Allow for better interoperability with other plugins that use this package."
@@ -53,9 +53,9 @@
             ],
             "description": "A wrapper for defining constants in a more testable way.",
             "support": {
-                "source": "https://github.com/Automattic/jetpack-constants/tree/v2.0.3"
+                "source": "https://github.com/Automattic/jetpack-constants/tree/v2.0.4"
             },
-            "time": "2024-05-29T09:44:58+00:00"
+            "time": "2024-08-23T14:28:14+00:00"
         },
         {
             "name": "x-wp/hook-contracts",
@@ -893,7 +893,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": "^8.1"
+        "php": ">=8.1"
     },
     "platform-dev": [],
     "plugin-api-version": "2.6.0"
