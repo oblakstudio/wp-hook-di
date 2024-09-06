@@ -8,11 +8,10 @@
 namespace Oblak\WP;
 
 use Automattic\Jetpack\Constants;
-use XWP\Contracts\Hook\Hookable;
 use XWP\Contracts\Hook\Initializable;
+use XWP\Contracts\Hook\Invokable;
 use XWP\Hook\Decorators\Action;
 use XWP\Hook\Decorators\Filter;
-use XWP\Hook\Decorators\Hook;
 
 /**
  * Annotation parser for legacy code.
@@ -21,34 +20,34 @@ final class Annotation_Parser {
     /**
      * Invoke hooks for a class or object.
      *
-     * @param  object     $class_or_obj Class or object to invoke the hooks for.
-     * @param  array|null $hooks        Hooks to invoke.
+     * @template T of object
+     * @param  T|Initializable<T>   $instance Class or object to invoke the hooks for.
+     * @param  ?array<Invokable<T>> $hooks    Hooks to invoke.
      */
-    public static function invoke_class_hooks( object $class_or_obj, ?array $hooks = null ) {
-        $handler = \XWP\Hook\Invoker::instance()->create_handler( $class_or_obj );
+    public static function invoke_class_hooks( object $instance, ?array $hooks = null ) {
+        $handler = \xwp_create_handler( $instance );
 
-        if ( ! $handler->target ) {
-            $handler->set_target( $class_or_obj );
+        if ( ! $handler->get_target() ) {
+            $handler->with_target( $instance );
         }
 
-        $hooks ??= self::get_class_hooks( $class_or_obj );
-        $hooks   = self::create_hook_decorators( $hooks, $handler );
+        $hooks ??= self::get_class_hooks( $instance );
+        $hooks   = self::create_hook_decorators( $handler, $hooks );
 
-        \XWP\Hook\Invoker::instance()
-            ->load_hooks( $handler, $hooks )
-            ->invoke_methods( $handler );
+        \xwp_load_hooks( $handler, $hooks )->invoke_methods( $handler );
     }
 
     /**
      * Get all the hooks in public methods of a class
      *
-     * @param  class-string|object $class_or_obj Class or object to get the hooks for.
-     * @param  array|null          $needed_keys  Keys that must be present in the parsed annotations.
-     * @param  bool                $all          Whether to get all the hooks or only the ones in the class.
-     * @return array                             Array of hooks.
+     * @template T of object
+     * @param  class-string<T>|T $instance Class or object to get the hooks for.
+     * @param  ?array<string>    $keys     Keys that must be present in the parsed annotations.
+     * @param  bool              $all      Whether to get all the hooks or only the ones in the class.
+     * @return array<string,array<string,mixed>>
      */
-    public static function get_class_hooks( $class_or_obj, ?array $needed_keys = null, bool $all = false ): array {
-        $reflector = new \ReflectionClass( $class_or_obj );
+    public static function get_class_hooks( string|object $instance, ?array $keys = null, bool $all = false ): array {
+        $reflector = new \ReflectionClass( $instance );
         $classname = $reflector->getName();
 
         $methods = \array_filter(
@@ -58,7 +57,7 @@ final class Annotation_Parser {
         $parsed  = array();
 
         foreach ( $methods as $m ) {
-            $data = self::parse_annotations( $m->getDocComment(), $needed_keys );
+            $data = self::parse_annotations( $m->getDocComment(), $keys );
 
             if ( ! $data ) {
                 continue;
@@ -73,11 +72,11 @@ final class Annotation_Parser {
     /**
      * Create hook decorators from the hooks.
      *
-     * @param  array<string, array> $hooks Hooks to create decorators for.
-     * @param  Initializable        $handler Handler to create the decorators for.
-     * @return array<string, array<Hookable>> Array of hook decorators.
+     * @param  Initializable       $handler Handler to create the decorators for.
+     * @param  array<string,array> $hooks    Hooks to create decorators for.
+     * @return array<string,array<Invokable>>
      */
-    public static function create_hook_decorators( array $hooks, Initializable $handler ): array {
+    public static function create_hook_decorators( Initializable $handler, array $hooks ): array {
         $decorators = array();
         $classes    = array(
             'action' => Action::class,
@@ -115,8 +114,8 @@ final class Annotation_Parser {
             $prio = self::parse_priority( $prios[ $i ] ?? '' );
 
             $decs[] = ( new $cn( tag: $tag, priority: $prio ) )
-                ->set_handler( $handler )
-                ->set_target( array( $handler->target, $method ) )
+                ->with_handler( $handler )
+                ->with_target( $method )
                 ->set_reflector( $data['refl'] );
         }
 
@@ -169,7 +168,9 @@ final class Annotation_Parser {
             static fn( $v ) => '' !== $v,
 		);
 
-        return \count( \wp_array_slice_assoc( $annotations, $needed_keys ) ) >= \count( $needed_keys )
+        $found = \xwp_array_slice_assoc( $annotations, ...$needed_keys );
+
+        return \count( $found ) >= \count( $needed_keys )
             ? $annotations
             : false;
 	}
