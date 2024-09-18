@@ -1,4 +1,4 @@
-<?php
+<?php //phpcs:disable SlevomatCodingStandard.Classes.SuperfluousTraitNaming.SuperfluousSuffix
 /**
  * Base_Plugin class file.
  *
@@ -9,7 +9,6 @@
 namespace Oblak\WP\Traits;
 
 use Oblak\WP\Decorators\Hookable;
-use Oblak\WP\Traits\Singleton_Trait;
 
 use function Oblak\WP\Utils\get_decorators;
 use function Oblak\WP\Utils\invoke_class_hooks;
@@ -18,7 +17,6 @@ use function Oblak\WP\Utils\invoke_class_hooks;
  * Enables basic DI and hooking functionality for plugins / themes
  */
 trait Hook_Processor_Trait {
-
     /**
      * Plugin textdomain
      *
@@ -33,8 +31,8 @@ trait Hook_Processor_Trait {
      * @param int    $priority Hook priority.
      */
     public function init( string $hook = 'plugins_loaded', int $priority = 10 ) {
-        add_action( $hook, array( $this, 'run_hooks' ), $priority );
-        add_action( $hook, array( $this, 'init_dependencies' ), $priority );
+        \add_action( $hook, array( $this, 'run_hooks' ), $priority );
+        \add_action( $hook, array( $this, 'init_dependencies' ), $priority );
     }
 
     /**
@@ -55,24 +53,14 @@ trait Hook_Processor_Trait {
      * Initializes the dependency dlasses
      */
     public function init_dependencies() {
-        $di_data = array();
-
         foreach ( $this->get_dependencies() as $dep_class ) {
-            $dep_data = $this->get_dependency_data( $dep_class );
+            $dep = $this->get_dependency_data( $dep_class );
 
-            if ( ! $dep_data ) {
+            if ( ! $dep || ! $dep['conditional']() ) {
                 continue;
             }
 
-            $di_data[ $dep_data['hook'] ][ $dep_data['priority'] ][] = wp_array_slice_assoc( $dep_data, array( 'classname', 'conditional' ) );
-        }
-
-        foreach ( $di_data as $hook => $priorities ) {
-            ksort( $priorities );
-
-            foreach ( $priorities as $priority => $deps ) {
-                add_action( $hook, fn() => $this->load_dependencies( $deps ), $priority );
-            }
+            \add_action( $dep['hook'], static fn() => new $dep_class(), $dep['priority'] );
         }
     }
 
@@ -84,31 +72,12 @@ trait Hook_Processor_Trait {
      */
     protected function get_dependency_data( string $dep_class ): ?array {
         $metadata = get_decorators( $dep_class, Hookable::class );
-        $metadata = array_shift( $metadata );
+        $metadata = \array_shift( $metadata );
 
         return $metadata ? array(
+            'conditional' => $metadata->conditional ?? '__return_true',
             'hook'        => $metadata->hook,
             'priority'    => $metadata->priority,
-            'classname'   => $dep_class,
-            'conditional' => $metadata->conditional,
         ) : null;
-    }
-
-
-    /**
-     * Loads the dependencies
-     *
-     * @param array<string, callable|class-string> $deps Array of dependencies.
-     */
-    protected function load_dependencies( array $deps ) {
-        $deps = wp_list_pluck(
-            array_filter(
-                $deps,
-                fn( $dep ) => $dep['conditional'](),
-            ),
-            'classname'
-        );
-
-        array_walk( $deps, fn( $d ) => new $d() );
     }
 }

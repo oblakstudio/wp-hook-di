@@ -39,13 +39,13 @@ function xwp_get_hooked_methods( object|string $obj, bool $all = false ): array 
 
     return array_filter(
         wp_array_flatmap(
-            $methods,
             static fn( $m ) => array(
 				$m->getName() => array(
                     'args'  => $m->getNumberOfParameters(),
                     'hooks' => xwp_get_hook_decorators( $m ),
 				),
             ),
+            $methods,
         ),
         static fn( $m ) => $m['hooks']
     );

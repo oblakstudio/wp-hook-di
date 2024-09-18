@@ -131,15 +131,15 @@ function get_class_hooks( $class_or_obj, ?array $needed_keys = null, bool $all =
             ),
             \array_filter(
                 \wp_array_flatmap(
-                    \array_filter(
-                        $reflector->getMethods( ReflectionMethod::IS_PUBLIC ) ?? array(),
-                        static fn( $method ) => $all || $method->class === $reflector->getName()
-                    ),
                     static fn( $method ) => array(
 						$method->getName() => parse_annotations(
                             $method,
                             $needed_keys,
                         ),
+                    ),
+                    \array_filter(
+                        $reflector->getMethods( ReflectionMethod::IS_PUBLIC ) ?? array(),
+                        static fn( $method ) => $all || $method->class === $reflector->getName()
                     ),
                 ),
             ),

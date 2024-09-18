@@ -1,14 +1,7 @@
 {
   "branches": [
     "master",
-    {
-      "name": "develop",
-      "prerelease": true
-    },
-    {
-      "name": "alpha",
-      "prerelease": true
-    },
+    "1.x",
     {
       "name": "beta",
       "prerelease": true
