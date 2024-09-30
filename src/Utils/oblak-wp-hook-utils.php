@@ -24,7 +24,8 @@ function xwp_invoke_hooked_methods( object|string $obj, ?bool $all = null ) {
     if ( ! is_object( $obj ) ) {
         $obj = new $obj();
     }
-    \XWP\Hook\Invoker::instance()->load_handler( $obj );
+
+    xwp_load_handler( $obj );
 }
 
 /**
