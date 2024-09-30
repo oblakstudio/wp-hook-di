@@ -14,7 +14,7 @@ use XWP\Hook\Decorators\Handler;
 /**
  * Defines class as hookable - it will be automatically constructed on given hook with given priority.
  *
- * @deprecated 1.0.0 Use `XWP\Hook\Decorators\Handler` instead.
+ * @deprecated 2.0.0 Use `XWP\Hook\Decorators\Handler` instead.
  */
 #[Attribute( Attribute::TARGET_CLASS )]
 class Hookable extends Handler {
