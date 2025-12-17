@@ -8,23 +8,23 @@
     "packages": [
         {
             "name": "automattic/jetpack-constants",
-            "version": "v2.0.4",
+            "version": "v2.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-constants.git",
-                "reference": "f6958c313a34c5e92171c45a57d9dc978e5975ed"
+                "reference": "0c2644d642b06ae2a31c561f5bfc6f74a4abc8f1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-constants/zipball/f6958c313a34c5e92171c45a57d9dc978e5975ed",
-                "reference": "f6958c313a34c5e92171c45a57d9dc978e5975ed",
+                "url": "https://api.github.com/repos/Automattic/jetpack-constants/zipball/0c2644d642b06ae2a31c561f5bfc6f74a4abc8f1",
+                "reference": "0c2644d642b06ae2a31c561f5bfc6f74a4abc8f1",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.0"
             },
             "require-dev": {
-                "automattic/jetpack-changelogger": "^4.2.6",
+                "automattic/jetpack-changelogger": "^4.2.8",
                 "brain/monkey": "2.6.1",
                 "yoast/phpunit-polyfills": "^1.1.1"
             },
@@ -35,11 +35,11 @@
             "extra": {
                 "autotagger": true,
                 "mirror-repo": "Automattic/jetpack-constants",
-                "changelogger": {
-                    "link-template": "https://github.com/Automattic/jetpack-constants/compare/v${old}...v${new}"
-                },
                 "branch-alias": {
                     "dev-trunk": "2.0.x-dev"
+                },
+                "changelogger": {
+                    "link-template": "https://github.com/Automattic/jetpack-constants/compare/v${old}...v${new}"
                 }
             },
             "autoload": {
@@ -53,9 +53,9 @@
             ],
             "description": "A wrapper for defining constants in a more testable way.",
             "support": {
-                "source": "https://github.com/Automattic/jetpack-constants/tree/v2.0.4"
+                "source": "https://github.com/Automattic/jetpack-constants/tree/v2.0.5"
             },
-            "time": "2024-08-23T14:28:14+00:00"
+            "time": "2024-11-04T09:23:35+00:00"
         },
         {
             "name": "psr/container",
@@ -1115,12 +1115,12 @@
     ],
     "aliases": [],
     "minimum-stability": "beta",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": ">=8.1"
     },
-    "platform-dev": [],
-    "plugin-api-version": "2.6.0"
+    "platform-dev": {},
+    "plugin-api-version": "2.9.0"
 }
